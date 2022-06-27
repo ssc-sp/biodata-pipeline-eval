@@ -137,6 +137,10 @@ From this notebook, I was able to run the pipeline without escaping to shell. I 
 
 The Kubeflow pipeline environment is an advanced tool and it should be considered only in cases where users want to push the optimization of their process to the max.
 
+At this stage, I put a focus on trying to create a pipeline that estimates the value of pi using python. I wanted to use this pipeline to leverage the parallelization of containers. For this I used the following ressources:
+- Approach 1 of [Calculating pi with python](https://www.geeksforgeeks.org/calculate-pi-with-python/)
+- 
+
 ## **ATLAS**
 
 ### **Databricks**
