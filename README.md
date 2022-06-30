@@ -1,26 +1,31 @@
 # **Bioinformatics Pipeline Evaluation**
 
 - [**Bioinformatics Pipeline Evaluation**](#bioinformatics-pipeline-evaluation)
-  - [**QIIME**](#qiime)
-    - [**Databricks**](#databricks)
-    - [Troubleshooting](#troubleshooting)
-    - [Performance Evaluation](#performance-evaluation)
-    - [**Replicating on AAW**](#replicating-on-aaw)
-    - [Remote Desktop environment](#remote-desktop-environment)
-    - [Notebook environment](#notebook-environment)
-    - [Pipeline environment](#pipeline-environment)
-  - [**ATLAS**](#atlas)
-    - [**Databricks**](#databricks-1)
-    - [Troubleshooting](#troubleshooting-1)
+  - [QIIME](#qiime)
+    - [Databricks](#databricks)
+      - [Troubleshooting](#troubleshooting)
+      - [Performance Evaluation](#performance-evaluation)
+      - [Additional Work](#additional-work)
+      - [Results](#results-and-takeaways)
+    - [Replicating on AAW](#replicating-on-aaw)
+      - [Remote Desktop environment](#remote-desktop-environment)
+      - [Notebook environment](#notebook-environment)
+      - [Pipeline environment](#pipeline-environment)
+  - [ATLAS](#atlas)
+    - [Databricks](#databricks-1)
+      - [Troubleshooting](#troubleshooting-1)
+      - [Results and Takeaways](#results-and-takeaways-1)
 
 ## **QIIME**
 
 We found that replicating QIIME in StatCan’s platform was slightly difficult due to issues with conda environments. These issues seem to have been tied with package installation/JFROG XRAY and were fixed after contacting the StatCan AAW team on Slack. On the other hand, a few features found on AAW seemed quite useful in the context of deploying pipelines. One such feature is the creation of notebooks from within an existing conda environment.
 
-We successfully ran the QIIME pipeline in Databricks after resolving several issues with the scripts. We are currently working to evaluate performance on Databricks.
+We successfully ran the QIIME pipeline in Databricks by using Shell commands within cells to run it. This is because Databricks does not allow us to activate a conda environment, while StatCan's platform allows us to start notebooks with a different environment.
 
 ### **Databricks**
-### Troubleshooting
+
+#### Troubleshooting
+
 We met with Guillaume to discuss what his issue was. He was running into an issue with the ITS training script as well as the actual pipeline. We were able to replicate these issues on our end as well. 
 
 Once we were able to replicate the issues, we worked on the QIIME Setup v2 script. We were able to resolve the issue with it by modifying some of the paths, and this script could then run fully, as shown below:
@@ -43,7 +48,7 @@ With these errors solved, the pipeline runs properly and can be evaluated, as sh
 
 ![Error picture](./assets/Picture2.png)
 
-### Performance Evaluation
+#### Performance Evaluation
 After successfully running the program, we wanted to evaluate the performance on the Databricks cluster. To do this, we started by following the code performance measurement guide here: Python Code Performance Measurement – Measure the right metric to optimize better!
 
 We placed the starting blocks prior to running the script, then the ending blocks immediately after. We obtained the following results:
@@ -54,8 +59,28 @@ Time elapsed: 356474.1015434265 milli seconds
 ```
 
 These results can be compared by running the same code elsewhere.
+
+#### Additional Work
+
+We attempted to determine if QIIME2 could be added to the existing environment on Databricks. This would allow us to create notebooks that directly use QIIME2, rather than having to use shell commands to do so. We attempted the following methods to add QIIME2:
+
+| Command | Result |
+| ---     | ---    |
+| `%conda env update --file qiime2_2022_4_py38_linux_conda.yml --prune` | `CalledProcessError: Command 'conda env update -p /local_disk0/.ephemeral_nfs/envs/pythonEnv-caed3ba9-87f4-4939-a9dd-a6b06d8675db --file qiime2_2022_4_py38_linux_conda.yml --prune' returned non-zero exit status 1.` |
+| `!conda env update --file qiime2_2022_4_py38_linux_conda.yml --prune` | Runs without error, produces no output but does not allow `import qiime2` to be run.
+| `!conda install -c qiime2 qiime2` | Runs without error, produces no output but does not allow `import qiime2` to be run. |
+
+We were unable to directly add QIIME2 to the Databricks Conda environment. So far, the only way we can successfully use QIIME2 is by using the `%sh` command in a notebook cell to run the Shell commands needed to do so.
+
+#### Results and Takeaways
+
+While we were successful in running a QIIME2 pipeline, we were not able to leverage Databricks notebooks to do so. This is because setting up QIIME2 requires setting up and activating an Anaconda environment, which is not currently possible on Databricks.
+
+The only way we were able to run the pipeline is by using the `%sh` command in a notebook cell in order to run the Shell commands necessary to setup and run QIIME2.
+
 ### **Replicating on AAW**
-### Remote Desktop environment
+
+#### Remote Desktop environment
 I have found the process of replicating this pipeline on StatCan’s platform to be slightly hard. The near necessity of using terminal forced me to use a remote desktop instead of a notebook. In the remote desktop, I have been encountering a lot of issues with setting up the proper QIIME2 environment:
 
 ![Error picture](./assets/Picture3.png)
@@ -65,7 +90,7 @@ When meeting with Guillaume, he said that he encountered the exact same issue an
 This was afterwards fixed at the same time the JFROG XRAY issues were fixed (mentioned in the Notebook environment section).
 From this point onward, the pipeline can be run in the Desktop environment and performance is identical to the Notebook environment.
 
-### Notebook environment
+#### Notebook environment
 
 My goal in the notebook was to recreate the “Moving Pictures” tutorial from QIIME. Once I have done the preliminary work of getting the qiime2 conda environment setup, I tried running
 ```
@@ -133,7 +158,7 @@ After, I was able to create a new notebook from within the python conda environm
 
 From this notebook, I was able to run the pipeline without escaping to shell. I ran the metrics tools when doing so, which resulted in the same results than when escaping to shell.
 
-### Pipeline environment
+#### Pipeline environment
 
 The Kubeflow pipeline environment is an advanced tool and it should be considered only in cases where users want to push the optimization of their process to the max.
 
@@ -143,8 +168,11 @@ At this stage, I put a focus on trying to create a pipeline that estimates the v
 
 ## **ATLAS**
 
+We were unable to successfully run an ATLAS pipeline in its entirety. We followed [a tutorial with samples](https://metagenome-atlas.readthedocs.io/en/latest/usage/getting_started.html#install-metagenome-atlas) but encountered a variety of errors. In Databricks, we encountered some of the same challenges as with QIIME2, as we were not able to set up and activate a conda environment within the cells.
+
 ### **Databricks**
-### Troubleshooting
+
+#### Troubleshooting
 
 To demonstrate the use of ATLAS on Databricks, I followed this tutorial: https://metagenome-atlas.readthedocs.io/en/latest/usage/getting_started.html#install-metagenome-atlas
 
@@ -158,12 +186,12 @@ conda config --add channels conda-forge
 conda install mamba
 mamba create -y -n atlasenv metagenome-atlas=2.9
 source activate atlasenv
-mkdir /tmp/atlastest2
-cd /tmp/atlastest2
+mkdir /tmp/atlas
+cd /tmp/atlas
 wget https://zenodo.org/record/3992790/files/test_reads.tar.gz
 tar -xzf test_reads.tar.gz
-atlas init --db-dir databases /tmp/atlastest/2
-atlas run None --resources mem=128 --keep-going --latency-wait=5
+atlas init --db-dir databases /tmp/atlas/test_reads
+atlas run None --resources mem=128 --keep-going --latency-wait=30
 ```
 
 I encountered several issues while doing this, such as:
@@ -180,9 +208,14 @@ This allowed faster troubleshooting, but there were still additional issues.
  - Cause: Most likely file system latency.
  - Solution: Adding the `–latency-wait` tag to tolerate more latency. https://github.com/snakemake/snakemake/issues/1734 recommends 30 seconds.
 
-Another problem was encountered
+Another problem was encountered near the end of execution:
 
  - Problem: `BUG: Out of jobs ready to be started, but not all files built yet`
  - Cause: Unknown. GitHub issue exists: https://github.com/snakemake/snakemake/issues/823 and https://github.com/snakemake/snakemake/issues/1687 
  - Solution: TBD
 
+#### Results and Takeaways
+
+We were unable to run the sample pipeline provided in the tutorial in its entirety on Databricks. While ATLAS appears to be fully installed and setup properly using our script, we encounter a bug towards the end of execution that prevents us from finishing. 
+
+While it seems possible to run an ATLAS pipeline in Databricks, we also encounter some of the same challenges as with QIIME2, as we were not able to set up and activate a conda environment within the cells.
