@@ -1,26 +1,33 @@
 # **Bioinformatics Pipeline Evaluation**
 
-- [**Bioinformatics Pipeline Evaluation**](#bioinformatics-pipeline-evaluation)
-  - [QIIME](#qiime)
-    - [Databricks](#databricks)
-      - [Troubleshooting](#troubleshooting)
-      - [Performance Evaluation](#performance-evaluation)
-      - [Additional Work](#additional-work)
-      - [Results](#results-and-takeaways)
-    - [Replicating on AAW](#replicating-on-aaw)
-      - [Remote Desktop environment](#remote-desktop-environment)
-      - [Notebook environment](#notebook-environment)
-      - [Pipeline environment](#pipeline-environment)
-  - [ATLAS](#atlas)
-    - [Databricks](#databricks-1)
-      - [Troubleshooting](#troubleshooting-1)
-      - [Results and Takeaways](#results-and-takeaways-1)
+We attempted to run bioinformatics pipelines using QIIME2 and Metagenome-ATLAS on several different platforms. The work completed is described here for each of the tools. 
 
-## **QIIME**
+We were forced to use the Shell to successfully run QIIME2 in Databricks as there is no way to change what conda environment a notebook uses.
+
+We were not able to completely run the ATLAS pipeline in Databricks.
+
+## Contents
+
+- [QIIME2](#qiime2)
+  - [Databricks](#databricks)
+    - [Troubleshooting](#troubleshooting)
+    - [Performance Evaluation](#performance-evaluation)
+    - [Additional Work](#additional-work)
+    - [Results](#results-and-takeaways)
+  - [Replicating on AAW](#replicating-on-aaw)
+    - [Remote Desktop environment](#remote-desktop-environment)
+    - [Notebook environment](#notebook-environment)
+    - [Pipeline environment](#pipeline-environment)
+- [ATLAS](#atlas)
+  - [Databricks](#databricks-1)
+    - [Troubleshooting](#troubleshooting-1)
+    - [Results and Takeaways](#results-and-takeaways-1)
+
+## **QIIME2**
 
 We found that replicating QIIME in StatCan’s platform was slightly difficult due to issues with conda environments. These issues seem to have been tied with package installation/JFROG XRAY and were fixed after contacting the StatCan AAW team on Slack. On the other hand, a few features found on AAW seemed quite useful in the context of deploying pipelines. One such feature is the creation of notebooks from within an existing conda environment.
 
-We successfully ran the QIIME pipeline in Databricks by using Shell commands within cells to run it. This is because Databricks does not allow us to activate a conda environment, while StatCan's platform allows us to start notebooks with a different environment.
+We successfully ran the QIIME pipeline in Databricks by using Shell commands within cells to run it. This is because Databricks does not allow us to activate a conda environment, meaning we are unable to fully leverage notebooks on Databricks. StatCan's platform allows us to start notebooks with a different environment.
 
 ### **Databricks**
 
@@ -38,7 +45,7 @@ We then worked on the QIIME_ITS_run script. The first error encountered was an i
  - Cause: Program was looking in the root directory (with /remote_empty_fastq_entries.py) rather than locally.
  - Solution: Copy the script to the root with cp remove_empty_fastq_entries.py /remove_empty_fastq_entries.py. In the future, this should be resolved in the code.
   
-There were additional issues regarding writing files needed for the pipeline to run. , so setting the output folder to mounted storage would cause an OSError: [Errno 95] Operation not supported error.
+There were additional issues regarding writing files needed for the pipeline to run. , so setting the output folder to mounted storage would cause an `OSError: [Errno 95] Operation not supported error`.
 
  - Problem: `OSError: [Errno 95] Operation not supported when attempting to write to the mounted storage. Failing to write also causes [Errno 2] No such file or directory since those files cannot be read later in the program.`
  - Cause: Databricks does not support writing to mounted storage.
@@ -62,7 +69,11 @@ These results can be compared by running the same code elsewhere.
 
 #### Additional Work
 
-We attempted to determine if QIIME2 could be added to the existing environment on Databricks. This would allow us to create notebooks that directly use QIIME2, rather than having to use shell commands to do so. We attempted the following methods to add QIIME2:
+We attempted to determine if QIIME2 could be added to the existing environment on Databricks. This would allow us to create notebooks that directly use QIIME2, rather than having to use shell commands to do so. 
+
+We followed the instructions at https://docs.qiime2.org/2022.2/install/native/ to attempt the installation. This was unsuccessful, as **[conda env create and conda activate are not supported on Databricks](https://databricks.com/blog/2020/06/17/simplify-python-environment-management-on-databricks-runtime-for-machine-learning-using-pip-and-conda.html)**. Attempting to do so results in `ValueError: conda activate is not supported in Databricks.`
+
+We also attempted the following methods to add QIIME2:
 
 | Command | Result |
 | ---     | ---    |
