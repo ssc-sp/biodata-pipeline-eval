@@ -1,27 +1,42 @@
 # **Bioinformatics Pipeline Evaluation**
 
+- [**Bioinformatics Pipeline Evaluation**](#bioinformatics-pipeline-evaluation)
+  - [**Results**](#results)
+  - [**Takeaways**](#takeaways)
+  - [**QIIME2**](#qiime2)
+    - [**Databricks**](#databricks)
+      - [Troubleshooting](#troubleshooting)
+      - [Performance Evaluation](#performance-evaluation)
+      - [Additional Work](#additional-work)
+      - [Results and Takeaways](#results-and-takeaways)
+    - [**Replicating on AAW**](#replicating-on-aaw)
+      - [Remote Desktop environment](#remote-desktop-environment)
+      - [Notebook environment](#notebook-environment)
+      - [Pipeline environment](#pipeline-environment)
+  - [**ATLAS**](#atlas)
+    - [**Databricks**](#databricks-1)
+      - [Troubleshooting](#troubleshooting-1)
+    - [**Replicating on AAW**](#replicating-on-aaw-1)
+
+## **Results**
+
 We attempted to run bioinformatics pipelines using QIIME2 and Metagenome-ATLAS on several different platforms. The work completed is described here for each of the tools. 
 
 We were forced to use the Shell to successfully run QIIME2 in Databricks as there is no way to change what conda environment a notebook uses.
 
 We were not able to completely run the ATLAS pipeline in Databricks.
 
-## Contents
+We were unable to run the sample pipeline provided in the tutorial in its entirety on Databricks. While ATLAS appears to be fully installed and setup properly using our script, we encounter a bug towards the end of execution that prevents us from finishing. 
 
-- [QIIME2](#qiime2)
-  - [Databricks](#databricks)
-    - [Troubleshooting](#troubleshooting)
-    - [Performance Evaluation](#performance-evaluation)
-    - [Additional Work](#additional-work)
-    - [Results](#results-and-takeaways)
-  - [Replicating on AAW](#replicating-on-aaw)
-    - [Remote Desktop environment](#remote-desktop-environment)
-    - [Notebook environment](#notebook-environment)
-    - [Pipeline environment](#pipeline-environment)
-- [ATLAS](#atlas)
-  - [Databricks](#databricks-1)
-    - [Troubleshooting](#troubleshooting-1)
-    - [Results and Takeaways](#results-and-takeaways-1)
+While it seems possible to run an ATLAS pipeline in Databricks, we also encounter some of the same challenges as with QIIME2, as we were not able to set up and activate a conda environment within the cells.
+
+As for the exploration work done in the StatCan AAW platform: we were able to run QIIME2 in their Kubeflow environment but were not able to make full use of the cluster as it is required to use the Kubeflow pipeline to fully make use.
+
+Running ATLAS in the Kubeflow environment was unsuccessful as we ran into several problems. These problems had not been encountered by others online and very little documentation exists on how to fix them
+
+## **Takeaways**
+
+- Databricks provides an interface closer to cluster ressources allowing users to make full use of resources easier (with the use of Spark). On the other hand, Databricks
 
 ## **QIIME2**
 
@@ -175,7 +190,11 @@ The Kubeflow pipeline environment is an advanced tool and it should be considere
 
 At this stage, I put a focus on trying to create a pipeline that estimates the value of pi using python. I wanted to use this pipeline to leverage the parallelization of containers. For this I used the following ressources:
 - Approach 1 of [Calculating pi with python](https://www.geeksforgeeks.org/calculate-pi-with-python/)
-- 
+- [Build a Pipeline](https://www.kubeflow.org/docs/components/pipelines/sdk/build-pipeline/)
+- [Building Components](https://www.kubeflow.org/docs/components/pipelines/sdk/component-development/)
+- [Building Python function-based components](https://www.kubeflow.org/docs/components/pipelines/sdk/python-function-components/)
+
+This work and exploration is currently put on pause: a lot of difficulties were encountered when learning how to use this environment due to the lack/low quality of documentation.
 
 ## **ATLAS**
 
@@ -225,8 +244,7 @@ Another problem was encountered near the end of execution:
  - Cause: Unknown. GitHub issue exists: https://github.com/snakemake/snakemake/issues/823 and https://github.com/snakemake/snakemake/issues/1687 
  - Solution: TBD
 
-#### Results and Takeaways
+### **Replicating on AAW**
 
-We were unable to run the sample pipeline provided in the tutorial in its entirety on Databricks. While ATLAS appears to be fully installed and setup properly using our script, we encounter a bug towards the end of execution that prevents us from finishing. 
+The work done was o
 
-While it seems possible to run an ATLAS pipeline in Databricks, we also encounter some of the same challenges as with QIIME2, as we were not able to set up and activate a conda environment within the cells.
