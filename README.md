@@ -36,7 +36,8 @@ Running ATLAS in the Kubeflow environment was unsuccessful as we ran into severa
 
 ## **Takeaways**
 
-- Databricks provides an interface closer to cluster ressources allowing users to make full use of resources easier (with the use of Spark). On the other hand, Databricks
+- Databricks provides an interface closer to cluster ressources allowing users to make better use of resources (with the use of Spark). On the other hand, Databricks provides less control over custom images, requiring the need of an admin to create custom images
+- Kubeflow (platform used by StatCan AAW) provides a JupyterLab interface which allows for the creation of custom conda environments and allows users to run notebooks directly within those environments. This is very valuable in a scientific environment. On the other hand, in order to fully use the computational resources of this environment, users need to use the pipeline feature of Kubeflow, which is poorly documented and has a high learning curve (compared to Spark).
 
 ## **QIIME2**
 
@@ -246,5 +247,5 @@ Another problem was encountered near the end of execution:
 
 ### **Replicating on AAW**
 
-The work done was o
+The work 
 
