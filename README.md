@@ -1,8 +1,9 @@
 # **Bioinformatics Pipeline Evaluation**
 
 - [**Bioinformatics Pipeline Evaluation**](#bioinformatics-pipeline-evaluation)
-  - [**Results**](#results)
   - [**Takeaways**](#takeaways)
+  - [**Introduction**](#introduction)
+  - [**Results**](#results)
   - [**QIIME2**](#qiime2)
     - [**Databricks**](#databricks)
       - [Troubleshooting](#troubleshooting)
@@ -17,6 +18,17 @@
     - [**Databricks**](#databricks-1)
       - [Troubleshooting](#troubleshooting-1)
     - [**Replicating on AAW**](#replicating-on-aaw-1)
+
+## **Takeaways**
+
+| Platform | Takeaways |
+|----------|-----------|
+|     **Databricks (NRCan DataHub)**     |  <ul><li><span style="color:green">Provides an interface closer to cluster resources (easy cluster management and monitoring).</span></li><li> <span style="color:green">Requires less work on user side to adapt for efficient resource use (in python, switching from Pandas to PySpark).</span></li><li> <span style="color:green">Provides quick and effective collaboration between users.</span></li> <li><span style="color:red">Provides less control over custom images, requiring the need of an admin to create custom images. This is still being explored and may simply come from our lack of understanding of the platform.</span></li></ul>       |
+|     **Kubeflow (StatCan AAW)**     |      <ul><li><span style="color:green">Provides a JupyterLab interface which allows for the creation of custom conda environments and allows users to run notebooks directly within those environments. This is very valuable in a scientific environment.</span></li> <li><span style="color:red">Pipelining in this environment requires a good amount of adaptation work: containerizing your workflow as well as integrating it in the Kubeflow Pipeline environment.</span></li><li><span style="color:red">The quality of the documentation, specifically for Kubeflow Pipeline, is quite low in addition to be inconsistent.</span></li></ul>     |
+
+## **Introduction**
+
+As part of explorative work within Shared Services Canada's Science Program Federal Science DataHub initiative, two existing platforms (Databricks and AAW's Kubeflow) and their toolsets were evaluated. The goal of these evaluations was to gain an understanding of the work a typical user would go through to move their existing pipelines to these previously mentioned platforms. Two biogenomics use cases were presented to us, QIIME2 and ATLAS, which we attempted to replicate in Natural Resources Canada's Databricks and Statistics Canada's Advanced Analytics Workspace (AAW), which leverages Kubeflow.
 
 ## **Results**
 
@@ -33,11 +45,6 @@ While it seems possible to run an ATLAS pipeline in Databricks, we also encounte
 As for the exploration work done in the StatCan AAW platform: we were able to run QIIME2 in their Kubeflow environment but were not able to make full use of the cluster as it is required to use the Kubeflow pipeline to fully make use.
 
 Running ATLAS in the Kubeflow environment was unsuccessful as we ran into several problems. These problems had not been encountered by others online and very little documentation exists on how to fix them
-
-## **Takeaways**
-
-- Databricks provides an interface closer to cluster ressources allowing users to make better use of resources (with the use of Spark). On the other hand, Databricks provides less control over custom images, requiring the need of an admin to create custom images
-- Kubeflow (platform used by StatCan AAW) provides a JupyterLab interface which allows for the creation of custom conda environments and allows users to run notebooks directly within those environments. This is very valuable in a scientific environment. On the other hand, in order to fully use the computational resources of this environment, users need to use the pipeline feature of Kubeflow, which is poorly documented and has a high learning curve (compared to Spark).
 
 ## **QIIME2**
 
@@ -247,5 +254,18 @@ Another problem was encountered near the end of execution:
 
 ### **Replicating on AAW**
 
-The work 
+The same [instructions](https://metagenome-atlas.readthedocs.io/en/latest/usage/getting_started.html#install-metagenome-atlas) used in Databricks were used here in order to test out ATLAS within the AAW. While the errors previously mentioned were not encountered, the following error causes the pipeline to crash after about 30 minutes.
+```[language]
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+ERROR conda.core.link:_execute(730): An error occurred while installing package 'conda-forge::ca-certificates-2022.6.15-ha878542_0'.
+Rolling back transaction: ...working... done
 
+[Errno 38] Function not implemented: 'cacert.pem' -> '/home/jovyan/minio/standard/shared/david-rene/databases/conda_envs/3fb0b5df27a112cf74c4ebdd7a301db5/ssl/cert.pem'
+()
+
+
+[Atlas] CRITICAL: Command 'snakemake --snakefile /opt/conda/envs/atlasenv/lib/python3.8/site-packages/atlas/workflow/Snakefile --directory /home/jovyan/minio/standard/shared/david-rene --jobs 16 --rerun-incomplete --configfile '/home/jovyan/minio/standard/shared/david-rene/config.yaml' --nolock   --use-conda --conda-prefix /home/jovyan/minio/standard/shared/david-rene/databases/conda_envs    --resources mem=59 mem_mb=61102 java_mem=50   --scheduler greedy    --resources mem=128 --keep-going --latency-wait=30 ' returned non-zero exit status 1.
+```
+There exists no documentation online regarding this error. This seems like an issue with installing a certificate, which could potentially have been blocked by jfrog XRAY. At this stage, due to the lack of documentation online as well as a lack of way forward, this was put on pause.
