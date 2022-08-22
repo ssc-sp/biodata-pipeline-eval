@@ -106,6 +106,12 @@ We also attempted the following methods to add QIIME2:
 
 We were unable to directly add QIIME2 to the Databricks Conda environment. So far, the only way we can successfully use QIIME2 is by using the `%sh` command in a notebook cell to run the Shell commands needed to do so.
 
+
+#### Custom Docker Image of QIIME2
+One possible solution for running the QIIME2 pipeline from the Databricks Notebooks without having to use the '%sh' command in the cell, is to create a custom docker image of the QIIME2 enviornment (with all its dependncies), and use that image in the cluster. This would allow us to use the QIIME2 Python code diretly from the Notebooks.
+
+An attempt to create this custom image using the Databricks minimal image as the base has not been successfull so far. It will require some research and some expertise in Docker to complete the bulding of this image. Once the image is ready, it can be tested on a Databricks cluster.
+
 #### Results and Takeaways
 
 While we were successful in running a QIIME2 pipeline, we were not able to leverage Databricks notebooks to do so. This is because setting up QIIME2 requires setting up and activating an Anaconda environment, which is not currently possible on Databricks.
