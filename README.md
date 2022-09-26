@@ -9,6 +9,7 @@
       - [Troubleshooting](#troubleshooting)
       - [Performance Evaluation](#performance-evaluation)
       - [Additional Work](#additional-work)
+      - [Custom Docker Image of QIIME2](#custom-docker-image-of-qiime2)
       - [Results and Takeaways](#results-and-takeaways)
     - [**Replicating on AAW**](#replicating-on-aaw)
       - [Remote Desktop environment](#remote-desktop-environment)
@@ -18,6 +19,9 @@
     - [**Databricks**](#databricks-1)
       - [Troubleshooting](#troubleshooting-1)
     - [**Replicating on AAW**](#replicating-on-aaw-1)
+  - [**R_ODAF Health Canada**](#r_odaf-health-canada)
+    - [**Databricks**](#databricks-2)
+      - [Troubleshooting](#troubleshooting-2)
 
 ## **Takeaways**
 
@@ -275,3 +279,30 @@ Rolling back transaction: ...working... done
 [Atlas] CRITICAL: Command 'snakemake --snakefile /opt/conda/envs/atlasenv/lib/python3.8/site-packages/atlas/workflow/Snakefile --directory /home/jovyan/minio/standard/shared/david-rene --jobs 16 --rerun-incomplete --configfile '/home/jovyan/minio/standard/shared/david-rene/config.yaml' --nolock   --use-conda --conda-prefix /home/jovyan/minio/standard/shared/david-rene/databases/conda_envs    --resources mem=59 mem_mb=61102 java_mem=50   --scheduler greedy    --resources mem=128 --keep-going --latency-wait=30 ' returned non-zero exit status 1.
 ```
 There exists no documentation online regarding this error. This seems like an issue with installing a certificate, which could potentially have been blocked by jfrog XRAY. At this stage, due to the lack of documentation online as well as a lack of way forward, this was put on pause.
+
+## **R_ODAF Health Canada**
+
+### **Databricks**
+
+R_ODAF consists of a snakemake pipeline with a few R analysis scripts on top. In order to setup the pipeline, one can use the following two repos:
+
+- Repo https://github.com/R-ODAF/R-ODAF_Health_Canada
+- Data https://github.com/EHSRB-BSRSE-Bioinformatics/test-data/tree/main/
+
+The Data repository contains a test script that highlights how to use the pipeline given the test data provided. This was used directly onto Databricks.
+
+#### Troubleshooting
+
+As a conda environment is required to run the pipeline, the Docker Conda cluster is used on Databricks to run the setup. When creating the conda environment using the ```environment.yml```, we run into errors as there are conflicts between the packages:
+```
+Determining conflicts:   0%|          | 0/63 [00:00<?, ?it/s]
+Examining conflict for bioconductor-enrichplot bioconductor-clusterprofiler:   0%|          | 0/63 [00:00<?, ?it/s]
+Examining conflict for rsem bioconductor-clusterprofiler bioconductor-deseq2 bioconductor-vsn bioconductor-org.hs.eg.db bioconductor-genomicfeatures bioconductor-quasr bioconductor-org.mm.eg.db bioconductor-enrichplot bioconductor-go.db:   2%|▏         | 1/63 [00:01<01:17,  1.25s/it]
+Examining conflict for rsem bioconductor-clusterprofiler bioconductor-deseq2 bioconductor-vsn bioconductor-org.hs.eg.db bioconductor-genomicfeatures bioconductor-quasr bioconductor-org.mm.eg.db bioconductor-enrichplot bioconductor-go.db:   3%|▎         | 2/63 [00:01<00:37,  1.61it/s]
+Examining conflict for bioconductor-clusterprofiler r-sfsmisc bioconductor-deseq2 r-devtools bioconductor-genomicfeatures bioconductor-quasr r-dt r-fields r-ggally r-sessioninfo r-cluster r-tidytext rsem r-dendsort anaconda-clean bioconductor-vsn r-kableextra r-vtree multiqc r-knitr r-rrcov r-data.table r-foreach bioconductor-go.db r-rvcheck r-dendextend bioconductor-rtracklayer r-plotly r-ggridges r-rcolorbrewer r-cairo bioconductor-limma bioconductor-edger r-heatmap3 bioconductor-enrichplot r-remotes r-viridis bioconductor-complexheatmap r-doparallel r-curl r-openxlsx r-tidyverse r-upsetr bioconductor-org.hs.eg.db r-biocmanager r-here snakemake bioconductor-org.mm.eg.db bioconductor-genomeinfodbdata r-ashr r-lattice r-yaml bioconductor-genomeinfodb r-magrittr r-pheatmap r-flextable r-gtools:   3%|▎         | 2/63 [00:11<00:37,  1.61it/s]
+Examining conflict for bioconductor-clusterprofiler
+...
+```
+This process is very long and is unable to resolve the conflicts and so it fails to create the environment. It was recommended online to give more leeway on the version requirements in order to fix this issue. We went through the environment file and gave as much free range as possible but this still did not fix the issue.
+
+Afterwards, we went through the snakefile to identify which were the least requirements to run the snakefile. Once identified, we tried to create a conda environment based solely on those requirements: the environment did not resolve even after running overnight.
